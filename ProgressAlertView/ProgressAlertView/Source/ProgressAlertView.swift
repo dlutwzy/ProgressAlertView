@@ -31,7 +31,7 @@ class ProgressAlertView: UIView {
     lazy var backgroundView: UIView = { return UIView(frame: .zero) }()
     var customView: UIView? {
         didSet {
-            guard viewType == .customView else {
+            guard self.style == .customView else {
                 return
             }
         }
@@ -41,9 +41,9 @@ class ProgressAlertView: UIView {
     lazy var button: UIButton = { return UIButton(frame: .zero) }()
 
     weak var delegate: ProgressAlertViewDelegate?
-    var viewType: ProgressAlertViewType = .indicator {
+    var style: ProgressAlertViewStyle = .indicator {
         didSet {
-            if type != oldValue {
+            if self.style != oldValue {
 
             }
         }

@@ -8,7 +8,7 @@
 
 import Foundation
 
-enum ProgressAlertViewType {
+enum ProgressAlertViewStyle {
     case indicator
     case determinate
     case horizontalProgressBar
@@ -17,9 +17,16 @@ enum ProgressAlertViewType {
     case textOnly
 }
 
-@objc enum ProgressAlertViewAnimation: Int {
+@objc
+enum ProgressAlertViewAnimation: Int {
     case fade
     case zoom
     case zoomOut
     case zoomIn
+}
+
+@objc
+enum ProgressAlertViewBackgroundStyle: Int {
+    case solidColor
+    case blur
 }

@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		551BEE6620A9C4600021E715 /* ProgressAlertBackgroundView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 551BEE6520A9C4600021E715 /* ProgressAlertBackgroundView.swift */; };
 		8803A61520A9298C0050A23A /* ProgressAlertView.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8803A60B20A9298C0050A23A /* ProgressAlertView.framework */; };
 		8803A61A20A9298C0050A23A /* ProgressAlertViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8803A61920A9298C0050A23A /* ProgressAlertViewTests.swift */; };
 		8803A61C20A9298C0050A23A /* ProgressAlertView.h in Headers */ = {isa = PBXBuildFile; fileRef = 8803A60E20A9298C0050A23A /* ProgressAlertView.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -25,6 +26,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		551BEE6520A9C4600021E715 /* ProgressAlertBackgroundView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressAlertBackgroundView.swift; sourceTree = "<group>"; };
 		8803A60B20A9298C0050A23A /* ProgressAlertView.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = ProgressAlertView.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		8803A60E20A9298C0050A23A /* ProgressAlertView.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ProgressAlertView.h; sourceTree = "<group>"; };
 		8803A60F20A9298C0050A23A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -96,6 +98,7 @@
 			children = (
 				8803A64720A937F50050A23A /* ProgressAlertView.swift */,
 				8803A64920A985DD0050A23A /* ProcessAlertViewEnums.swift */,
+				551BEE6520A9C4600021E715 /* ProgressAlertBackgroundView.swift */,
 			);
 			path = Source;
 			sourceTree = "<group>";
@@ -209,6 +212,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				551BEE6620A9C4600021E715 /* ProgressAlertBackgroundView.swift in Sources */,
 				8803A64820A937F50050A23A /* ProgressAlertView.swift in Sources */,
 				8803A64A20A985DD0050A23A /* ProcessAlertViewEnums.swift in Sources */,
 			);

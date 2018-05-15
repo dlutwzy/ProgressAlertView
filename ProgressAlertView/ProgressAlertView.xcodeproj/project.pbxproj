@@ -13,6 +13,8 @@
 		8803A61C20A9298C0050A23A /* ProgressAlertView.h in Headers */ = {isa = PBXBuildFile; fileRef = 8803A60E20A9298C0050A23A /* ProgressAlertView.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		8803A64820A937F50050A23A /* ProgressAlertView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8803A64720A937F50050A23A /* ProgressAlertView.swift */; };
 		8803A64A20A985DD0050A23A /* ProcessAlertViewEnums.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8803A64920A985DD0050A23A /* ProcessAlertViewEnums.swift */; };
+		880DEF0320AAADDB00005EDF /* ProgressAlertRoundedButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880DEF0220AAADDB00005EDF /* ProgressAlertRoundedButton.swift */; };
+		880DEF0620AAB70300005EDF /* UIView+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 880DEF0520AAB70300005EDF /* UIView+Extension.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -35,6 +37,8 @@
 		8803A61B20A9298C0050A23A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8803A64720A937F50050A23A /* ProgressAlertView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressAlertView.swift; sourceTree = "<group>"; };
 		8803A64920A985DD0050A23A /* ProcessAlertViewEnums.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProcessAlertViewEnums.swift; sourceTree = "<group>"; };
+		880DEF0220AAADDB00005EDF /* ProgressAlertRoundedButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProgressAlertRoundedButton.swift; sourceTree = "<group>"; };
+		880DEF0520AAB70300005EDF /* UIView+Extension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extension.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,11 +100,21 @@
 		8803A64620A937D30050A23A /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				880DEF0420AAB6ED00005EDF /* Extension */,
 				8803A64720A937F50050A23A /* ProgressAlertView.swift */,
 				8803A64920A985DD0050A23A /* ProcessAlertViewEnums.swift */,
 				551BEE6520A9C4600021E715 /* ProgressAlertBackgroundView.swift */,
+				880DEF0220AAADDB00005EDF /* ProgressAlertRoundedButton.swift */,
 			);
 			path = Source;
+			sourceTree = "<group>";
+		};
+		880DEF0420AAB6ED00005EDF /* Extension */ = {
+			isa = PBXGroup;
+			children = (
+				880DEF0520AAB70300005EDF /* UIView+Extension.swift */,
+			);
+			path = Extension;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -214,6 +228,8 @@
 			files = (
 				551BEE6620A9C4600021E715 /* ProgressAlertBackgroundView.swift in Sources */,
 				8803A64820A937F50050A23A /* ProgressAlertView.swift in Sources */,
+				880DEF0320AAADDB00005EDF /* ProgressAlertRoundedButton.swift in Sources */,
+				880DEF0620AAB70300005EDF /* UIView+Extension.swift in Sources */,
 				8803A64A20A985DD0050A23A /* ProcessAlertViewEnums.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -15,6 +15,55 @@ protocol ProgressAlertViewDelegate {
     func alertViewDidHidden(alertView: ProgressAlertView)
 }
 
+extension ProgressAlertView {
+
+    convenience init(showAlertView inView: UIView) {
+
+        self.init(view: inView)
+
+        self.isRemoveFromSuperViewWhenHide = true
+        inView.addSubview(self)
+//        self.showA
+    }
+}
+
+extension ProgressAlertView {
+
+    private func showAlertView(animated: Bool) {
+
+        self.minShowTimer?.invalidate()
+        self.useAnimation = animated
+        self.isFinished = false
+
+        if self.graceTimeInterval > 0.0 {
+            self.graceTimer = Timer.init(timeInterval: self.graceTimeInterval,
+                                         target: self,
+                                         selector: #selector(graceTimerHandle),
+                                         userInfo: nil,
+                                         repeats: false)
+        }
+    }
+
+    @objc
+    private func graceTimerHandle() {
+        if self.isFinished == false {
+
+        }
+    }
+
+    private func show(animated: Bool) {
+        self.bezelView.layer.removeAllAnimations()
+        self.backgroundView.layer.removeAllAnimations()
+
+        self.hideDelayTimer?.invalidate()
+
+        self.shownDate = Date()
+        self.alpha = 1.0
+
+
+    }
+}
+
 class ProgressAlertView: UIView {
     typealias CompletionBlock = () -> Void
 
@@ -27,7 +76,8 @@ class ProgressAlertView: UIView {
     @objc dynamic var isMotionEffectsEnabled: Bool = false
 
     var progress: Float = 0.0
-    lazy var lezelView: UIView = { return UIView(frame: .zero) }()
+    var progressObject: Progress?
+    lazy var bezelView: UIView = { return UIView(frame: .zero) }()
     lazy var backgroundView: UIView = { return UIView(frame: .zero) }()
     var customView: UIView? {
         didSet {
@@ -60,7 +110,7 @@ class ProgressAlertView: UIView {
     private var isFinished: Bool = false
 
     private lazy var indicator: UIView = { return UIView() }()
-    private var showStarted: NSDate?
+    private var shownDate: Date?
     private var paddingConstraints: [NSLayoutConstraint] = [NSLayoutConstraint]()
     private var bezelConstraints: [NSLayoutConstraint] = [NSLayoutConstraint]()
     private lazy var topSpacer: UIView = { return UIView() }()
@@ -69,19 +119,16 @@ class ProgressAlertView: UIView {
     private var minShowTimer: Timer?
     private var hideDelayTimer: Timer?
     private var processObjectDisplayLink: CADisplayLink?
+    private var progressDisplayer: Bool = false {
+        didSet {
+
+        }
+    }
 
     private struct StaticValue {
         let maxOffset: CGFloat = 1000000.0
         let defaultPadding: CGFloat = 4.0
         let defaultLabelFontSize: CGFloat = 17.0
         let defaultDetailsLabelFontSize: CGFloat = 12.0
-    }
-}
-
-extension ProgressAlertView {
-
-    func testUI() {
-        let appearance = ProgressAlertView.appearance()
-//        appearance.contentColor
     }
 }

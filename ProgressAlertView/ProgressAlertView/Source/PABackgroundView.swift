@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ProgressAlertBackgroundView: UIView {
+class PABackgroundView: UIView {
 
     @objc dynamic var style: ProgressAlertViewBackgroundStyle = .blur {
         didSet {
@@ -64,7 +64,7 @@ class ProgressAlertBackgroundView: UIView {
     }
 }
 
-extension ProgressAlertBackgroundView {
+extension PABackgroundView {
 
     private func updateUI() {
 

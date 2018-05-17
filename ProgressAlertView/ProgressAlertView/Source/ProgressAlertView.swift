@@ -17,13 +17,13 @@ protocol ProgressAlertViewDelegate {
 
 extension ProgressAlertView {
 
-    convenience init(showAlertView inView: UIView) {
+    convenience init(showAlertView inView: UIView, animated: Bool) {
 
         self.init(view: inView)
 
         self.isRemoveFromSuperViewWhenHide = true
         inView.addSubview(self)
-//        self.showA
+        self.showAlertView(animated: animated)
     }
 }
 
@@ -36,13 +36,19 @@ extension ProgressAlertView {
         self.isFinished = false
 
         if self.graceTimeInterval > 0.0 {
-            self.graceTimer = Timer.init(timeInterval: self.graceTimeInterval,
-                                         target: self,
-                                         selector: #selector(graceTimerHandle),
-                                         userInfo: nil,
-                                         repeats: false)
+            let timer = Timer(timeInterval: self.graceTimeInterval,
+                                    target: self,
+                                    selector: #selector(graceTimerHandle),
+                                    userInfo: nil,
+                                    repeats: false)
+            RunLoop.current.add(timer, forMode: .commonModes)
+            self.graceTimer = timer
+        } else {
+            self.show(animated: self.useAnimation)
         }
     }
+
+
 
     @objc
     private func graceTimerHandle() {
@@ -60,25 +66,85 @@ extension ProgressAlertView {
         self.shownDate = Date()
         self.alpha = 1.0
 
+        self.isProgressDisplayerLinkEnable = true
 
+        if animated {
+            self.animate(animateIn: true, type: self.animationType, completion: nil)
+        } else {
+            self.bezelView.alpha = 1.0
+            self.backgroundView.alpha = 1.0
+        }
+    }
+
+    private func animate(animateIn: Bool,
+                         type: ProgressAlertViewAnimation,
+                         completion: ((Bool) -> Void)?) {
+
+        let type = (type == .zoom ? (animateIn ? .zoomIn : .zoomOut) : type)
+
+        let small = CGAffineTransform(scaleX: 0.5, y: 0.5)
+        let large = CGAffineTransform(scaleX: 1.5, y: 1.5)
+
+        if animateIn && self.bezelView.alpha == 0.0 {
+            if type == .zoomIn {
+                bezelView.transform = small
+            } else if type == .zoomOut {
+                bezelView.transform = large
+            }
+        }
+
+        UIView.animate(withDuration: 0.3,
+                       delay: 0.0,
+                       usingSpringWithDamping: 1.0,
+                       initialSpringVelocity: 0.0,
+                       options: .beginFromCurrentState,
+                       animations: { [weak self] in
+                            if animateIn {
+                                self?.bezelView.transform = CGAffineTransform.identity
+                            } else {
+                                if type == .zoomIn {
+                                    self?.bezelView.transform = large
+                                } else if type == .zoomOut {
+                                    self?.bezelView.transform = small
+                                }
+                            }
+
+                            let alpha: CGFloat = animateIn ? 1.0 : 0.0
+                            self?.bezelView.alpha = alpha
+                            self?.backgroundView.alpha = alpha
+                        },
+                       completion: completion)
     }
 }
 
 class ProgressAlertView: UIView {
     typealias CompletionBlock = () -> Void
 
-    @objc dynamic var contentColor: UIColor?
+    @objc dynamic var contentColor: UIColor? {
+        didSet {
+            if contentColor != oldValue &&
+                contentColor?.isEqual(oldValue) == false {
+
+            }
+        }
+    }
     @objc dynamic var animationType: ProgressAlertViewAnimation = .zoom
     @objc dynamic var offset: CGPoint = .zero
     @objc dynamic var margin: CGFloat = 0.0
     @objc dynamic var minSize: CGSize = .zero
     @objc dynamic var isSquare: Bool = true
-    @objc dynamic var isMotionEffectsEnabled: Bool = false
+    @objc dynamic var isMotionEffectsEnabled: Bool = false {
+        didSet {
+            if isMotionEffectsEnabled != oldValue {
+                self.updateBezelMontionEffects()
+            }
+        }
+    }
 
-    var progress: Float = 0.0
+    var progress: Double = 0.0
     var progressObject: Progress?
-    lazy var bezelView: UIView = { return UIView(frame: .zero) }()
-    lazy var backgroundView: UIView = { return UIView(frame: .zero) }()
+    lazy var bezelView: UIView = { return PABackgroundView(frame: .zero) }()
+    lazy var backgroundView: UIView = { return PABackgroundView(frame: .zero) }()
     var customView: UIView? {
         didSet {
             guard self.style == .customView else {
@@ -118,10 +184,17 @@ class ProgressAlertView: UIView {
     private var graceTimer: Timer?
     private var minShowTimer: Timer?
     private var hideDelayTimer: Timer?
-    private var processObjectDisplayLink: CADisplayLink?
-    private var progressDisplayer: Bool = false {
+    private var progressObjectDisplayLink: CADisplayLink?
+    private var isProgressDisplayerLinkEnable: Bool = false {
         didSet {
-
+            if isProgressDisplayerLinkEnable && self.progressObject != nil {
+                if progressObjectDisplayLink == nil {
+                    progressObjectDisplayLink = CADisplayLink(target: self,
+                                                              selector: #selector(updateProgressFromProgressObject))
+                }
+            } else {
+                progressObjectDisplayLink = nil
+            }
         }
     }
 
@@ -130,5 +203,65 @@ class ProgressAlertView: UIView {
         let defaultPadding: CGFloat = 4.0
         let defaultLabelFontSize: CGFloat = 17.0
         let defaultDetailsLabelFontSize: CGFloat = 12.0
+    }
+}
+
+extension ProgressAlertView {
+
+    @objc
+    private func updateProgressFromProgressObject() {
+        self.progress = self.progressObject?.fractionCompleted ?? 0.0
+    }
+
+    private func updateBezelMontionEffects() {
+        guard bezelView.responds(to: #selector(PABackgroundView.addMotionEffect(_:))) else {
+            return
+        }
+
+        if isMotionEffectsEnabled {
+            let effectOffset: CGFloat = 10.0
+            let effectX = UIInterpolatingMotionEffect(keyPath: "center.x", type: .tiltAlongHorizontalAxis)
+            effectX.minimumRelativeValue = -effectOffset
+            effectX.maximumRelativeValue = effectOffset
+
+            let effectY = UIInterpolatingMotionEffect(keyPath: "center.y", type: .tiltAlongVerticalAxis)
+            effectX.minimumRelativeValue = -effectOffset
+            effectX.maximumRelativeValue = effectOffset
+
+            let effectGroup = UIMotionEffectGroup()
+            effectGroup.motionEffects = [effectX, effectY]
+
+            bezelView.addMotionEffect(effectGroup)
+        } else {
+            let effectGroup = bezelView.motionEffects
+            for effect in effectGroup {
+                bezelView.removeMotionEffect(effect)
+            }
+        }
+    }
+
+    private func updateView(byColor color: UIColor?) {
+        guard let color = color else {
+            return
+        }
+
+        self.label.textColor = color
+        self.detailsLabel.textColor = color
+        self.button.setTitleColor(color, for: .normal)
+
+        if indicator.isKind(of: UIActivityIndicatorView.self) {
+            let appearance: UIActivityIndicatorView = UIActivityIndicatorView.appearance(whenContainedInInstancesOf: [PABackgroundView.self])
+            if appearance.color == nil {
+                (indicator as? UIActivityIndicatorView)?.color = color
+            }
+        } else if indicator.isKind(of: PARoundedButton.self) {
+
+        } else if indicator.isKind(of: ProgressAlertView.self) {
+
+        } else {
+            if indicator.responds(to: #selector(setter: UIView.tintColor)) {
+                indicator.tintColor = color
+            }
+        }
     }
 }

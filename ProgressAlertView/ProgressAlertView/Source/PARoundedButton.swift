@@ -8,7 +8,7 @@
 
 import UIKit
 
-class ProgressAlertRoundedButton: UIButton {
+class PARoundedButton: UIButton {
 
     override init(frame: CGRect) {
         super.init(frame: frame)

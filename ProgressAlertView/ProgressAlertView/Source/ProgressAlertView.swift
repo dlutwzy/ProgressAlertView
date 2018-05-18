@@ -25,6 +25,14 @@ extension ProgressAlertView {
         inView.addSubview(self)
         self.showAlertView(animated: animated)
     }
+
+    convenience init(hideAlertView inView: UIView, animated: Bool) {
+
+        self.init(view: inView)
+
+        self.isRemoveFromSuperViewWhenHide = true
+        self.hideAlertView(animated: animated)
+    }
 }
 
 extension ProgressAlertView {
@@ -48,13 +56,40 @@ extension ProgressAlertView {
         }
     }
 
+    private func hideAlertView(animated: Bool) {
 
+        self.graceTimer?.invalidate()
+        self.useAnimation = animated
+        self.isFinished = true
+
+        if self.minShowTimeInterval > 0.0 && self.shownDate != nil {
+            let timeInterval = NSDate().timeIntervalSince(self.shownDate!)
+            if timeInterval < self.minShowTimeInterval {
+                let timer = Timer(timeInterval: self.minShowTimeInterval - timeInterval,
+                                  target: self,
+                                  selector: #selector(minShowTimerHandle),
+                                  userInfo: nil,
+                                  repeats: false)
+                RunLoop.current.add(timer, forMode: .commonModes)
+                self.minShowTimer = timer
+
+                return
+            }
+        }
+
+        self.hide(animated: self.useAnimation)
+    }
 
     @objc
     private func graceTimerHandle() {
         if self.isFinished == false {
-
+            self.show(animated: self.useAnimation)
         }
+    }
+
+    @objc
+    private func minShowTimerHandle() {
+        self.hide(animated: self.useAnimation)
     }
 
     private func show(animated: Bool) {
@@ -73,6 +108,16 @@ extension ProgressAlertView {
         } else {
             self.bezelView.alpha = 1.0
             self.backgroundView.alpha = 1.0
+        }
+    }
+
+    private func hide(animated: Bool) {
+        self.hideDelayTimer?.invalidate()
+        if animated && self.shownDate != nil {
+            self.shownDate = nil
+            self.animate(animateIn: false, type: self.animationType) { [weak self] (finished) in
+                self?.done()
+            }
         }
     }
 
@@ -115,6 +160,58 @@ extension ProgressAlertView {
                         },
                        completion: completion)
     }
+
+    private func done() {
+
+        self.isProgressDisplayerLinkEnable = false
+        if self.isFinished {
+            self.alpha = 0.0
+            if self.isRemoveFromSuperViewWhenHide {
+                self.removeFromSuperview()
+            }
+        }
+        self.completionBlock?()
+        self.delegate?.alertViewDidHidden?(alertView: self)
+    }
+}
+
+extension ProgressAlertView {
+    private func initializeUI() {
+
+    }
+
+    private func updateIndicator() {
+        switch self.style {
+
+        case .indicator:
+            if self.indicator.isKind(of: UIActivityIndicatorView.self) == false {
+                self.indicator.removeFromSuperview()
+                self.indicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
+                self.bezelView.addSubview(self.indicator)
+            }
+        case .horizontalProgressBar:
+            self.indicator.removeFromSuperview()
+            self.indicator = PABarProgressView(frame: .zero)
+            self.bezelView.addSubview(indicator)
+        case .determinate:
+            if self.indicator.isKind(of: PARoundProgressView.self) == false {
+                self.indicator.removeFromSuperview()
+                self.indicator = PARoundProgressView(frame: .zero)
+                self.bezelView.addSubview(indicator)
+            }
+        case .annularDeterminate:
+            if self.indicator.isKind(of: PARoundProgressView.self) == false {
+                self.indicator.removeFromSuperview()
+                self.indicator = PARoundProgressView(frame: .zero)
+                self.bezelView.addSubview(indicator)
+            }
+            (self.indicator as? PARoundProgressView)?.isAnnular = true
+        case .customView:
+            if self.customView == self.indicator {}
+        case .textOnly:
+            <#code#>
+        }
+    }
 }
 
 class ProgressAlertView: UIView {
@@ -128,7 +225,7 @@ class ProgressAlertView: UIView {
             }
         }
     }
-    @objc dynamic var animationType: ProgressAlertViewAnimation = .zoom
+    @objc dynamic var animationType: ProgressAlertViewAnimation = .fade
     @objc dynamic var offset: CGPoint = .zero
     @objc dynamic var margin: CGFloat = 0.0
     @objc dynamic var minSize: CGSize = .zero
@@ -139,6 +236,11 @@ class ProgressAlertView: UIView {
                 self.updateBezelMontionEffects()
             }
         }
+    }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+        initializeUI()
     }
 
     var progress: Double = 0.0
@@ -160,7 +262,7 @@ class ProgressAlertView: UIView {
     var style: ProgressAlertViewStyle = .indicator {
         didSet {
             if self.style != oldValue {
-
+                self
             }
         }
     }
@@ -173,7 +275,7 @@ class ProgressAlertView: UIView {
     private var opacity: CGFloat = 0.0
 
     private var useAnimation: Bool = true
-    private var isFinished: Bool = false
+    var isFinished: Bool = false
 
     private lazy var indicator: UIView = { return UIView() }()
     private var shownDate: Date?
@@ -203,6 +305,10 @@ class ProgressAlertView: UIView {
         let defaultPadding: CGFloat = 4.0
         let defaultLabelFontSize: CGFloat = 17.0
         let defaultDetailsLabelFontSize: CGFloat = 12.0
+    }
+
+    required init?(coder aDecoder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
 }
 

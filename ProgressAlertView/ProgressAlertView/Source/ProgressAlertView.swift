@@ -184,32 +184,68 @@ extension ProgressAlertView {
         switch self.style {
 
         case .indicator:
-            if self.indicator.isKind(of: UIActivityIndicatorView.self) == false {
-                self.indicator.removeFromSuperview()
+            if self.indicator == nil ||
+                self.indicator!.isKind(of: UIActivityIndicatorView.self) == false {
+
+                self.indicator?.removeFromSuperview()
                 self.indicator = UIActivityIndicatorView(activityIndicatorStyle: .whiteLarge)
-                self.bezelView.addSubview(self.indicator)
+                self.bezelView.addSubview(self.indicator!)
             }
         case .horizontalProgressBar:
-            self.indicator.removeFromSuperview()
-            self.indicator = PABarProgressView(frame: .zero)
-            self.bezelView.addSubview(indicator)
-        case .determinate:
-            if self.indicator.isKind(of: PARoundProgressView.self) == false {
-                self.indicator.removeFromSuperview()
-                self.indicator = PARoundProgressView(frame: .zero)
-                self.bezelView.addSubview(indicator)
+            if self.indicator == nil ||
+                self.indicator!.isKind(of: PABarProgressView.self) == false {
+
+                self.indicator?.removeFromSuperview()
+                self.indicator = PABarProgressView(frame: .zero)
+                self.bezelView.addSubview(self.indicator!)
             }
-        case .annularDeterminate:
-            if self.indicator.isKind(of: PARoundProgressView.self) == false {
-                self.indicator.removeFromSuperview()
+        case .determinate, .annularDeterminate:
+            if self.indicator == nil ||
+                self.indicator!.isKind(of: PARoundProgressView.self) == false {
+
+                self.indicator?.removeFromSuperview()
                 self.indicator = PARoundProgressView(frame: .zero)
-                self.bezelView.addSubview(indicator)
+                self.bezelView.addSubview(indicator!)
             }
-            (self.indicator as? PARoundProgressView)?.isAnnular = true
+            if self.style == .annularDeterminate {
+                (self.indicator as? PARoundProgressView)?.isAnnular = true
+            }
         case .customView:
-            if self.customView == self.indicator {}
+            if self.customView != self.indicator {
+                self.indicator?.removeFromSuperview()
+                self.indicator = self.customView
+                if let indicator = self.indicator {
+                    self.bezelView.addSubview(indicator)
+                }
+            }
         case .textOnly:
-            <#code#>
+            self.indicator?.removeFromSuperview()
+            self.indicator = nil
+        }
+
+        guard let indicator = self.indicator else {
+            return
+        }
+        indicator.translatesAutoresizingMaskIntoConstraints = false
+        indicator.setValue(self.progress, forKey: "progress")
+
+        indicator.setContentCompressionResistancePriority(UILayoutPriority(rawValue: 998.0),
+                                                          for: .horizontal)
+        indicator.setContentCompressionResistancePriority(UILayoutPriority(rawValue: 998.0),
+                                                          for: .vertical)
+
+        updateView(byColor: self.contentColor)
+        self.setNeedsUpdateConstraints()
+    }
+
+    internal override func updateConstraints() {
+
+        var bezelConstraints = [NSLayoutConstraint]()
+        let metrics = ["margin": self.margin]
+
+        var views = [self.topSpacer, self.label, self.detailsLabel, self.button, self.bottomSpacer]
+        if let indicator = self.indicator {
+            views.insert(indicator, at: 1)
         }
     }
 }
@@ -221,7 +257,7 @@ class ProgressAlertView: UIView {
         didSet {
             if contentColor != oldValue &&
                 contentColor?.isEqual(oldValue) == false {
-
+                self.updateView(byColor: contentColor)
             }
         }
     }
@@ -243,7 +279,7 @@ class ProgressAlertView: UIView {
         initializeUI()
     }
 
-    var progress: Double = 0.0
+    var progress: CGFloat = 0.0
     var progressObject: Progress?
     lazy var bezelView: UIView = { return PABackgroundView(frame: .zero) }()
     lazy var backgroundView: UIView = { return PABackgroundView(frame: .zero) }()
@@ -277,7 +313,7 @@ class ProgressAlertView: UIView {
     private var useAnimation: Bool = true
     var isFinished: Bool = false
 
-    private lazy var indicator: UIView = { return UIView() }()
+    private var indicator: UIView?
     private var shownDate: Date?
     private var paddingConstraints: [NSLayoutConstraint] = [NSLayoutConstraint]()
     private var bezelConstraints: [NSLayoutConstraint] = [NSLayoutConstraint]()
@@ -316,7 +352,7 @@ extension ProgressAlertView {
 
     @objc
     private func updateProgressFromProgressObject() {
-        self.progress = self.progressObject?.fractionCompleted ?? 0.0
+        self.progress = CGFloat(self.progressObject?.fractionCompleted ?? 0.0)
     }
 
     private func updateBezelMontionEffects() {
@@ -350,20 +386,27 @@ extension ProgressAlertView {
         guard let color = color else {
             return
         }
+        guard let indicator = self.indicator else {
+            return
+        }
 
         self.label.textColor = color
         self.detailsLabel.textColor = color
         self.button.setTitleColor(color, for: .normal)
 
         if indicator.isKind(of: UIActivityIndicatorView.self) {
-            let appearance: UIActivityIndicatorView = UIActivityIndicatorView.appearance(whenContainedInInstancesOf: [PABackgroundView.self])
+            let appearance: UIActivityIndicatorView = UIActivityIndicatorView.appearance(whenContainedInInstancesOf: [ProgressAlertView.self])
             if appearance.color == nil {
                 (indicator as? UIActivityIndicatorView)?.color = color
             }
-        } else if indicator.isKind(of: PARoundedButton.self) {
-
-        } else if indicator.isKind(of: ProgressAlertView.self) {
-
+        } else if indicator.isKind(of: PARoundProgressView.self) {
+            let rpView = indicator as? PARoundProgressView
+            rpView?.progressTintColor = color
+            rpView?.backgroundTintColor = color.withAlphaComponent(0.1)
+        } else if indicator.isKind(of: PABarProgressView.self) {
+            let bpView = indicator as? PABarProgressView
+            bpView?.progressTintColor = color
+            bpView?.lineColor = color
         } else {
             if indicator.responds(to: #selector(setter: UIView.tintColor)) {
                 indicator.tintColor = color

@@ -35,7 +35,8 @@ class PARoundProgressView: UIButton {
         return StaticValue.defaultSize
     }
 
-    var progress: CGFloat = 0.0 {
+    @objc
+    dynamic var progress: CGFloat = 0.0 {
         didSet {
             if progress != oldValue {
                 self.setNeedsDisplay()

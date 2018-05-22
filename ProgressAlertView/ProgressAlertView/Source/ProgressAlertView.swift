@@ -240,12 +240,52 @@ extension ProgressAlertView {
 
     internal override func updateConstraints() {
 
-        var bezelConstraints = [NSLayoutConstraint]()
-        let metrics = ["margin": self.margin]
-
         var views = [self.topSpacer, self.label, self.detailsLabel, self.button, self.bottomSpacer]
         if let indicator = self.indicator {
             views.insert(indicator, at: 1)
+        }
+
+        self.removeConstraints(self.constraints)
+        topSpacer.removeConstraints(topSpacer.constraints)
+        bottomSpacer.removeConstraints(bottomSpacer.constraints)
+
+        bezelView.removeConstraints(self.bezelConstraints)
+        self.bezelConstraints.removeAll()
+
+        do {
+            let offset = self.offset
+            var centerConstraints = [NSLayoutConstraint]()
+            centerConstraints += [NSLayoutConstraint(item: bezelView,
+                                                     attribute: .centerX,
+                                                     relatedBy: .equal,
+                                                     toItem: self,
+                                                     attribute: .centerX,
+                                                     multiplier: 1.0,
+                                                     constant: offset.x)]
+            centerConstraints += [NSLayoutConstraint(item: bezelView,
+                                                     attribute: .centerX,
+                                                     relatedBy: .equal,
+                                                     toItem: self,
+                                                     attribute: .centerX,
+                                                     multiplier: 1.0,
+                                                     constant: offset.y)]
+            self.apply(priority: UILayoutPriority(rawValue: 998.0), constraints: centerConstraints)
+            self.addConstraints(centerConstraints)
+        }
+
+        do {
+            let metrics = ["margin": self.margin]
+            var sideConstraints = [NSLayoutConstraint]()
+            sideConstraints += NSLayoutConstraint.constraints(withVisualFormat: "|-(>=margin)-[bezelView]-(>=margin)-|",
+                                                              options: [],
+                                                              metrics: metrics,
+                                                              views: ["bezel": self.bezelView])
+        }
+    }
+
+    private func apply(priority: UILayoutPriority, constraints: [NSLayoutConstraint]) {
+        for constraint in constraints {
+            constraint.priority = priority
         }
     }
 }
